@@ -1,0 +1,2 @@
+Keep defaults for command-line arguments in a config file.
+Don't do anything for "checkout --update" when the URL is already correct.
