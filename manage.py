@@ -45,11 +45,11 @@ def getVersions(pkgOrder):
     return pkgVersionDict
 
 def getDefaultDmsUrl():
-    if dms_url is None:
-	try:
-	    dms_url = os.environ["LSST_DMS"]
-	except KeyError:
-	    dms_url = "%/DMS" % os.environ.get("LSST_SVN", "svn+ssh://svn.lsstcorp.org")    
+    try:
+	dms_url = os.environ["LSST_DMS"]
+    except KeyError:
+	dms_url = "%/DMS" % os.environ.get("LSST_SVN", "svn+ssh://svn.lsstcorp.org")
+    return dms_url
 
 def checkout(root, dms_url=None, dry_run=False, update=False, replace=False, remove=False, **kw):
     pkgOrder = getOrder()
