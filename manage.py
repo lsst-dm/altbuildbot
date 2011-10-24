@@ -90,7 +90,7 @@ def checkout(root, dms_url=None, dry_run=False, update=False, replace=False, rem
 		    cmd = "svn co %s %s" % (pkgUrl, pkgDir)
 		    if os.system(cmd) != 0:
 			raise OSError("Failure in external command: '%s'" % cmd)
-		    
+   
 def update(root, dms_url=None, dry_run=False, **kw):
     pkgOrder = getOrder()
     pkgVersions = getVersions(pkgOrder)
@@ -106,6 +106,24 @@ def update(root, dms_url=None, dry_run=False, **kw):
 	sys.stderr.write("Updating %s\n" % pkgDir)
 	if not dry_run:
 	    cmd = "svn update %s" % pkgDir
+	    if os.system(cmd) != 0:
+		raise OSError("Failure in external command: '%s'" % cmd)
+   
+def status(root, dms_url=None, dry_run=False, **kw):
+    pkgOrder = getOrder()
+    pkgVersions = getVersions(pkgOrder)
+    for pkgName in pkgOrder:
+	pkgVersion = pkgVersions.get(pkgName, pkgVersions["default"])
+	pkgDir = os.path.join(root, pkgName)
+	if pkgVersion is None:
+	    if os.path.exists(pkgDir):
+		sys.stderr.write("Ignoring unmanaged directory %s\n" % pkgDir)
+	    continue
+	if not os.path.exists(pkgDir):
+	    sys.stderr.write("WARNING: skipping nonexistent directory %s\n" % pkgDir)
+	sys.stderr.write("Status on %s:\n" % pkgDir)
+	if not dry_run:
+	    cmd = "svn status %s" % pkgDir
 	    if os.system(cmd) != 0:
 		raise OSError("Failure in external command: '%s'" % cmd)
 
@@ -148,6 +166,9 @@ def main(args):
 	    "        manage.py [global options] command\n\n"\
 	    "Supported commands are:\n"\
 	    "        checkout         Checkout a new stack from SVN or switch URLs\n"\
+	    "        update           Update a stack from SVN\n"\
+	    "        build            Build the stack with repeated scons calls\n"\
+            "        status           Run 'svn status' on each package\n"\
 	    "\n"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-r", "--root", type="string", metavar="DIR", default=".", dest="root",
@@ -181,6 +202,8 @@ def main(args):
 	checkout(**optDict)
     elif cmd == "update":
 	update(**optDict)
+    elif cmd == "status":
+	status(**optDict)
     elif cmd == "metasetup":
 	metasetup(**optDict)
     elif cmd == "build":
